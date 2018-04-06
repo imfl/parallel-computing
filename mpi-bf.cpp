@@ -1,21 +1,20 @@
-// 17/11/1 = Wed
+// 17/11/01 = Wed
 
-// Modified Sample 1 of MPI Bellman-Ford
-// See function bellman_ford() for details of modifications
+// MPI Bellman-Ford
 
-#include <string>
-#include <cassert>
-#include <iostream>
-#include <fstream>
 #include <algorithm>
-#include <iomanip>
+#include <cassert>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <string>
 
 #include "mpi.h"
 
-using std::string;
 using std::cout;
 using std::endl;
+using std::string;
 
 #define INF 1000000
 
@@ -24,8 +23,8 @@ using std::endl;
  * including I/O (read input file and print results) and matrix dimension convert(2D->1D) function
  */
 namespace utils {
-    int N; //number of vertices
-    int *mat; // the adjacency matrix
+    int N; 				//number of vertices
+    int *mat;			// the adjacency matrix
 
     void abort_with_error_message(string msg) {
         std::cerr << msg << endl;
@@ -70,33 +69,12 @@ namespace utils {
     }
 }
 
-// Modifications :
-// 1. remove loc_n, broadcast n instead;
-// 2. distribute as evenly as possible -- not much speed-up;
-// 3. remove loc_mat, allocate space for mat for slaves, and broadcast master's mat;
-// 4. do not call utils::convert_dimension_2D_1D(), just compute mat[u * n + v] -- faster;
-// 5. [IMPORTANT] swap ranges of u and v in matrix iterations -- much faster, for input2.txt, time improves from 0.09+ to 0.07+, with <4>, and to 0.06+ with <4> and <5>;
-// 6. add "if (my_dist[u] == INF) continue" -- not much speed-up;
-// 7. [IMPORTANT] however, cannot use my_work, MPI_Allgatherv() like what I did in mbf.cpp -- and there is no need of MPI_Barrier() for each iteration in the loop;
-// 8. again, swap range of u and v in detecting negative cycles;
-// 9. combine two nested "if"s into an "and";
-// 10. more simplifications in detecting negative cycles -- once a negative is found, we are done -- just jump out of outer loop and there's need to update distance.
-// Key: "Yes, all collective communication calls (Reduce, Scatter, Gather, etc) are blocking. There's no need for the barrier."
-// Results (4 processes for MPI programs) :
-//                  input2  input_1000  input_1012  input_15000
-// 1. sbf       :   0.12+   3.3+        5.9+        11+
-// 2. mbf       :   0.35+   0.5+        2.0+        45+
-// 3. s1mbf     :   0.09+   1.8+        2.8+         9+
-// 4. s1mbf-m   :   0.06+   0.5+        2.0+         6+
-// * All s1mbf-m results are consistent with sbf results.
-// # processes  :   1       2           3           4
-//     s1mbf-m  :   8.1     7.7         6.2         6.4
 void bellman_ford(int my_rank, int p, MPI_Comm comm, int n, int *mat, int *dist, bool *has_negative_cycle)
 {
     MPI_Bcast(&n, 1, MPI_INT, 0, comm);
     int *my_dist;
 
-    int q = n / p, r = n % p; //q for quotient, r for remainder
+    int q = n / p, r = n % p;				//q for quotient, r for remainder
     int load[p], begin[p];
     load[0] = q;
     for (int i = 1; i < p; ++i)
@@ -189,8 +167,8 @@ int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm comm;
 
-    int p;//number of processors
-    int my_rank;//my global rank
+    int p; 						//number of processors
+    int my_rank; 				//my global rank
     comm = MPI_COMM_WORLD;
     MPI_Comm_size(comm, &p);
     MPI_Comm_rank(comm, &my_rank);
