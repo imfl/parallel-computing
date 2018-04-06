@@ -1,8 +1,3 @@
-/**
- * Name: FU Lei
- * Student id: 2038 9529
- * ITSC email: lei.fu@connect.ust.hk
- */
 /*
  * This is a openmp version of bellman_ford algorithm
  * Compile: g++ -std=c++11 -fopenmp -o openmp_bellman_ford openmp_bellman_ford.cpp
